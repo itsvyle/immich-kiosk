@@ -75,7 +75,17 @@ func BuildURL(baseConfig *config.Config) echo.HandlerFunc {
 			formError = "This URL is longer than browsers allow. Kiosk has trimmed it, so some of your selected options may not be applied."
 		}
 
-		return Render(c, http.StatusOK, partials.URLResult(renderURL, formError))
+		yamlOutput := "Please provide a name to generate YAML output."
+		name := queries.Get("name")
+		if name != "" {
+			r := config.Redirect{
+				Name: name,
+				URL:  kioskURL.RequestURI(),
+			}
+			yamlOutput = fmt.Sprintf("name: %s\nurl: %s", r.Name, r.URL)
+		}
+
+		return Render(c, http.StatusOK, partials.BuildResponse(renderURL, formError, yamlOutput))
 	}
 }
 
