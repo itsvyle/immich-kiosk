@@ -262,13 +262,6 @@ body#url-builder {
         }
     }
 
-    .result__content {
-        margin-top: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
     .yaml-display {
         background-color: #f5f5f5;
         border: 1px solid #e0e0e0;

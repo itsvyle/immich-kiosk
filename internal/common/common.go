@@ -136,6 +136,10 @@ type URLViewData struct {
 }
 
 type URLBuilderRequest struct {
+	// Metadata
+	Name *string `form:"name" url:"-"`
+	Type *string `form:"type" url:"-"`
+
 	// Duration
 	Duration       *uint64 `form:"duration" url:"duration,omitempty"`
 	OptimizeImages *bool   `form:"optimize_images" url:"optimize_images,omitempty"`

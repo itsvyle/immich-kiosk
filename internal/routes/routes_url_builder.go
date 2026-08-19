@@ -14,6 +14,7 @@ import (
 	"github.com/damongolding/immich-kiosk/internal/templates/views"
 	"github.com/google/go-querystring/query"
 	"github.com/labstack/echo/v5"
+	"go.yaml.in/yaml/v3"
 )
 
 func BuildURL(baseConfig *config.Config) echo.HandlerFunc {
@@ -76,13 +77,22 @@ func BuildURL(baseConfig *config.Config) echo.HandlerFunc {
 		}
 
 		yamlOutput := "Please provide a name to generate YAML output."
-		name := queries.Get("name")
-		if name != "" {
-			r := config.Redirect{
-				Name: name,
-				URL:  kioskURL.RequestURI(),
+		if req.Name != nil {
+			resolvedType := ""
+			if req.Type != nil {
+				resolvedType = *req.Type
 			}
-			yamlOutput = fmt.Sprintf("name: %s\nurl: %s", r.Name, r.URL)
+			r := config.Redirect{
+				Name: *req.Name,
+				URL:  kioskURL.RequestURI(),
+				Type: resolvedType,
+			}
+			var yamlBytes []byte
+			yamlBytes, err = yaml.Marshal(&r)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("marshaling YAML: %v", err))
+			}
+			yamlOutput = string(yamlBytes)
 		}
 
 		return Render(c, http.StatusOK, partials.BuildResponse(renderURL, formError, yamlOutput))

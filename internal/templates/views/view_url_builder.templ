@@ -132,7 +132,9 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 					}) }
 					}
 				>
+					<h2>YAML Metadata</h2>
 					@URLBuilderText("Name", "name", "The name of the redirect. Only required if you want to use the YAML output.", "")
+					@URLBuilderSelect("Type", "type", "The type of redirect to create.", "internal", "internal", "external", "external")
 					// Behaviour
 					<h2>Behaviour</h2>
 					@URLBuilderNumber("Duration", "duration", "The amount of time in seconds an asset will be displayed for", 0, 0, strconv.FormatInt(int64(c.Duration), 10))
@@ -321,7 +323,17 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 		description: A long config line to demonstrate horizontal scrolling when overflow occurs</code></pre>
 					</div>
 
-					<button class="extended-link">Save</button>
+					<button 
+						type="button" 
+						class="extended-link"
+						hx-post="/url-builder/build"
+						hx-include="#url-builder-form"
+						hx-vals='{"save": "true"}'
+						hx-target="#url-result"
+						hx-swap="outerHTML"
+					>
+						Save
+					</button>
 				</div>
 			</div>
 		</div>
