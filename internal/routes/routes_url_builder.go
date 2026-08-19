@@ -78,14 +78,12 @@ func BuildURL(baseConfig *config.Config) echo.HandlerFunc {
 
 		yamlOutput := "Please provide a name to generate YAML output."
 		if req.Name != nil {
-			resolvedType := ""
-			if req.Type != nil {
-				resolvedType = *req.Type
-			}
 			r := config.Redirect{
 				Name: *req.Name,
 				URL:  kioskURL.RequestURI(),
-				Type: resolvedType,
+			}
+			if req.Type != nil {
+				r.Type = *req.Type
 			}
 			var yamlBytes []byte
 			yamlBytes, err = yaml.Marshal(&r)

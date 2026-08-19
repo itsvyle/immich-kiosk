@@ -36,63 +36,30 @@ func weatherLocationOptions(locations []config.WeatherLocation) []string {
 	return options
 }
 
-type OldData map[string]any
-func GetValue[T any](data OldData, formName string) (T,bool) {
-	var zero T
-	if data == nil {
-		return zero, false
+func boolPtrToStringPtr(b *bool) *string {
+	if b == nil {
+		return nil
 	}
-
-	val, exists := data[formName]
-	if !exists {
-		return zero, false
+	if *b {
+		s := "true"
+		return &s
+	} else {
+		s := "false"
+		return &s
 	}
-
-	typedVal, ok := val.(T)
-	if !ok {
-		return zero, false
-	}
-
-	return typedVal, true
 }
 
-func (d OldData) IsSelected(formName string, value string) bool {
-	if d == nil {
-		return false
+func intPtrToUInt64Ptr(i *int) *uint64 {
+	if i == nil {
+		return nil
 	}
-
-	val, exists := d[formName]
-	if !exists {
-		return false
-	}
-
-	switch v := val.(type) {
-	case string:
-		return v == value
-	case []string:		for _, item := range v {
-			if item == value {
-				return true
-			}
-		}
-		return slices.Contains(v, value)
-	case fmt.Stringer: 
-		return v.String() == value
-	}
-
-	return false
+	u := uint64(*i)
+	return &u
 }
 
-var old OldData
+var old common.URLBuilderRequest
 func init() {
-	old = make(OldData)
-	old["duration"] = "10"
-	old["require_all_people"] = "true"
-	old["album_order"] = "random"
-	old["layout"] = "portrait"
-	old["person"] = []string{
-		"40f5239b-d685-4114-95b0-b7b03f7bed40",
-		"600edf6f-e357-436c-af99-95f549a419de",
-	}
+	old = common.URLBuilderRequest{}
 }
 
 templ URLBuilder(viewData common.ViewData, urlData common.URLViewData, extended bool) {
@@ -133,35 +100,35 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 					}
 				>
 					<h2>YAML Metadata</h2>
-					@URLBuilderText("Name", "name", "The name of the redirect. Only required if you want to use the YAML output.", "")
-					@URLBuilderSelect("Type", "type", "The type of redirect to create.", "internal", "internal", "external", "external")
+					@URLBuilderText("Name", "name", "The name of the redirect. Only required if you want to use the YAML output.", "", old.Name)
+					@URLBuilderSelect("Type", "type", "The type of redirect to create.", old.Type,"internal", "internal", "external", "external")
 					// Behaviour
 					<h2>Behaviour</h2>
-					@URLBuilderNumber("Duration", "duration", "The amount of time in seconds an asset will be displayed for", 0, 0, strconv.FormatInt(int64(c.Duration), 10))
+					@URLBuilderNumber("Duration", "duration", "The amount of time in seconds an asset will be displayed for", 0, 0, strconv.FormatInt(int64(c.Duration), 10),old.Duration)
 					if extended {
-						@URLBuilderRadio("Optimize", "optimize_images", "Scale images to fit the screen.", "true", "true", "false", "false")
-						@URLBuilderNumber("Burn-in Interval", "burn_in_interval", "The interval between burn-in protection cycles (minutes, 0 to disable).", 0, 0, strconv.FormatInt(int64(c.BurnInInterval), 10))
-						@URLBuilderNumber("Burn-in Duration", "burn_in_duration", "The duration of each burn-in protection cycle (seconds).", 1, 0, strconv.FormatInt(int64(c.BurnInDuration), 10))
-						@URLBuilderNumber("Burn-in Opacity", "burn_in_opacity", "The opacity the UI will dip to, as a percentage", 0, 100, strconv.FormatInt(int64(c.BurnInOpacity), 10))
+						@URLBuilderRadio("Optimize", "optimize_images", "Scale images to fit the screen.", boolPtrToStringPtr(old.OptimizeImages), "true", "true", "false", "false")
+						@URLBuilderNumber("Burn-in Interval", "burn_in_interval", "The interval between burn-in protection cycles (minutes, 0 to disable).", 0, 0, strconv.FormatInt(int64(c.BurnInInterval), 10), old.BurnInInterval)
+						@URLBuilderNumber("Burn-in Duration", "burn_in_duration", "The duration of each burn-in protection cycle (seconds).", 1, 0, strconv.FormatInt(int64(c.BurnInDuration), 10), old.BurnInDuration)
+						@URLBuilderNumber("Burn-in Opacity", "burn_in_opacity", "The opacity the UI will dip to, as a percentage", 0, 100, strconv.FormatInt(int64(c.BurnInOpacity), 10), old.BurnInOpacity)
 					}
 					// Buckets
 					<h2>Buckets</h2>
 					@URLBuilderMultiSelect("People", "people", "Person or people you want to display.") {
 						for _, p := range d.People {
-							<option value={ p.ID } selected?={old.IsSelected("person", p.ID)}>{ p.Name }</option>
+							<option value={ p.ID } selected?={slices.Contains(old.People, p.ID)}>{ p.Name }</option>
 						}
 					}
-					@URLBuilderRadio("Require all people", "require_all_people", "Only show images where all selected people appear together.", "true", "true", "false", "false")
+					@URLBuilderRadio("Require all people", "require_all_people", "Only show images where all selected people appear together.", boolPtrToStringPtr(old.RequireAllPeople), "true", "true", "false", "false")
 					if extended {
 						@URLBuilderMultiSelect("Excluded people", "excluded_people", "Person or people you want to exclude.") {
 							for _, p := range d.People {
-								<option value={ p.ID } selected?={old.IsSelected("exclude_person", p.ID)}>{ p.Name }</option>
+								<option value={ p.ID } selected?={slices.Contains(old.ExcludedPeople, p.ID)}>{ p.Name }</option>
 							}
 						}
 					}
 					@URLBuilderMultiSelect("Albums", "albums", "Album or albums you want to display. Albums with ~ special keyword albums") {
 						for _, a := range d.Albums {
-							<option value={ a.ID } selected?={old.IsSelected("album", a.ID)}>{ a.AlbumName }</option>
+							<option value={ a.ID } selected?={slices.Contains(old.Albums, a.ID)}>{ a.AlbumName }</option>
 						}
 						// Special album keywords
 						<option value="all">~ All Albums</option>
@@ -172,17 +139,17 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 					if extended {
 						@URLBuilderMultiSelect("Excluded albums", "excluded_albums", "Album or albums you want to exclude") {
 							for _, a := range d.Albums {
-								<option value={ a.ID } selected?={old.IsSelected("exclude_album", a.ID)}>{ a.AlbumName }</option>
+								<option value={ a.ID } selected?={slices.Contains(old.ExcludedAlbums, a.ID)}>{ a.AlbumName }</option>
 							}
 						}
 					}
-					@URLBuilderRadio("Album order", "album_order", "The order in which albums will be displayed.", "random", "random", "newest", "newest", "oldest", "oldest")
+					@URLBuilderRadio("Album order", "album_order", "The order in which albums will be displayed.", old.AlbumOrder, "random", "random", "newest", "newest", "oldest", "oldest")
 					@URLBuilderMultiSelect("Tags", "tags", "Tag or tags you want to display") {
 						for _, t := range d.Tags {
 							if strings.EqualFold(t.Name, kiosk.TagSkip) || strings.EqualFold(t.Value, kiosk.TagSkip) {
 								{{ continue }}
 							}
-							<option value={ t.ID } selected?={old.IsSelected("tag", t.ID)}>{ t.Name }</option>
+							<option value={ t.ID } selected?={slices.Contains(old.Tags, t.ID)}>{ t.Name }</option>
 						}
 					}
 					if extended {
@@ -191,15 +158,15 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 								if strings.EqualFold(t.Name, kiosk.TagSkip) || strings.EqualFold(t.Value, kiosk.TagSkip) {
 									{{ continue }}
 								}
-								<option value={ t.ID } selected?={old.IsSelected("exclude_tag", t.ID)}>{ t.Name }</option>
+								<option value={ t.ID } selected?={slices.Contains(old.ExcludedTags, t.ID)}>{ t.Name }</option>
 							}
 						}
 					}
-					@URLBuilderNumber("Rating", "rating", "The star rating of assets you want to display", -1, 5, strconv.FormatInt(int64(c.Rating), 10))
-					@URLBuilderRadio("Memories", "memories", "Display memories.", "true", "true", "false", "false")
+					@URLBuilderNumber("Rating", "rating", "The star rating of assets you want to display", -1, 5, strconv.FormatInt(int64(c.Rating), 10), intPtrToUInt64Ptr(old.Rating))
+					@URLBuilderRadio("Memories", "memories", "Display memories.", boolPtrToStringPtr(old.ShowMemories), "true", "true", "false", "false")
 					if extended {
-						@URLBuilderNumber("Past memory days", "past_memory_days", "Include memories from the last N days. 0 shows only today.", 0, 360, strconv.FormatInt(int64(c.PastMemoryDays), 10))
-						@URLBuilderRadio("Include archived", "show_archived", "Allow assets marked as archived to be displayed.", "true", "true", "false", "false")
+						@URLBuilderNumber("Past memory days", "past_memory_days", "Include memories from the last N days. 0 shows only today.", 0, 360, strconv.FormatInt(int64(c.PastMemoryDays), 10), old.PastMemoryDays)
+						@URLBuilderRadio("Include archived", "show_archived", "Allow assets marked as archived to be displayed.", boolPtrToStringPtr(old.ShowArchived), "true", "true", "false", "false")
 					}
 					if extended {
 						// Video
@@ -340,7 +307,7 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 	</section>
 }
 
-templ URLBuilderNumber(displayName, formName, helpText string, min int, max int, placeholder string) {
+templ URLBuilderNumber(displayName, formName, helpText string, min int, max int, placeholder string, oldValue *uint64) {
 	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		<label for={ "url-builder-" + formName }>{ displayName }</label>
@@ -402,7 +369,7 @@ templ URLBuilderMultiSelectWithOptions(displayName, formName, helpText string, o
 	@templ.JSFuncCall("urlBuilder.initMultiselect", elementID, displayName, options)
 }
 
-templ URLBuilderRadio(displayName string, formName string, helpText string, keyvals ...string) {
+templ URLBuilderRadio(displayName string, formName string, helpText string, oldValue *string, keyvals ...string) {
 	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		<legend>{ displayName }</legend>
@@ -411,6 +378,9 @@ templ URLBuilderRadio(displayName string, formName string, helpText string, keyv
 			kvs := make([]string, 0, len(keyvals)+2)
 			kvs = append(kvs, "default", "")
 			kvs = append(kvs, keyvals...)
+			if len(kvs) % 2 != 0 {
+				panic(fmt.Sprintf("keyvals for '%s' must have an even number of elements", formName))
+			}
 		}}
 		<div class="form-group--radio-group">
 			for i:=0; i<len(kvs); i+=2 {
@@ -431,7 +401,7 @@ templ URLBuilderRadio(displayName string, formName string, helpText string, keyv
 	</div>
 }
 
-templ URLBuilderText(displayName, formName, helpText, defaultValue string) {
+templ URLBuilderText(displayName, formName, helpText, defaultValue string, oldValue *string) {
 	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		{{ elementID := "url-builder-" + formName }}
@@ -451,7 +421,7 @@ templ URLBuilderText(displayName, formName, helpText, defaultValue string) {
 	</div>
 }
 
-templ URLBuilderSelect(displayName string, formName string, helpText string, keyvals ...string) {
+templ URLBuilderSelect(displayName string, formName string, helpText string, oldValue *string, keyvals ...string) {
 	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		{{ elementID := "url-builder-" + formName }}
@@ -461,6 +431,9 @@ templ URLBuilderSelect(displayName string, formName string, helpText string, key
 			kvs := make([]string, 0, len(keyvals)+2)
 			kvs = append(kvs, "default", "")
 			kvs = append(kvs, keyvals...)
+			if len(kvs) % 2 != 0 {
+				panic(fmt.Sprintf("keyvals for '%s' must have an even number of elements", formName))
+			}
 		}}
 		<select id={ elementID } name={ formName }>
 			for i:=0; i<len(kvs); i+=2 {
