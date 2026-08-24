@@ -171,87 +171,86 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 					if extended {
 						// Video
 						<h2>Video</h2>
-						@URLBuilderRadio("Show videos", "show_videos", "Display videos.", "true", "true", "false", "false")
-						@URLBuilderRadio("Live photos", "live_photos", "Display live photos.", "true", "true", "false", "false")
-						@URLBuilderNumber("Live photo loop delay", "live_photo_loop_delay", "The delay (in seconds) between each live photo replay.", 0, 0, strconv.FormatInt(int64(c.LivePhotoLoopDelay), 10))
-						@URLBuilderRadio("Show animated GIFs", "show_animated_gifs", "Display animated GIFs.", "true", "true", "false", "false")
+						@URLBuilderRadio("Show videos", "show_videos", "Display videos.", boolPtrToStringPtr(old.ShowVideos), "true", "true", "false", "false")
+						@URLBuilderRadio("Live photos", "live_photos", "Display live photos.", boolPtrToStringPtr(old.LivePhotos), "true", "true", "false", "false")
+						@URLBuilderNumber("Live photo loop delay", "live_photo_loop_delay", "The delay (in seconds) between each live photo replay.", 0, 0, strconv.FormatInt(int64(c.LivePhotoLoopDelay), 10), old.LivePhotoLoopDelay)
+						@URLBuilderRadio("Show animated GIFs", "show_animated_gifs", "Display animated GIFs.", boolPtrToStringPtr(old.ShowAnimatedGifs), "true", "true", "false", "false")
 					}
 					// Clock
 					<h2>Clock</h2>
-					@URLBuilderRadio("Show time", "show_time", "Display the current time.", "true", "true", "false", "false")
+					@URLBuilderRadio("Show time", "show_time", "Display the current time.", boolPtrToStringPtr(old.ShowTime), "true", "true", "false", "false")
 					if extended {
-						@URLBuilderRadio("Time format", "time_format", "The format in which the time will be displayed.", "24 hour", "24", "12 hour", "12")
-						@URLBuilderRadio("Show AM/PM", "show_am_pm", "Display AM/PM indicator for the time when the time format is 12 hour.", "true", "true", "false", "false")
+						@URLBuilderRadio("Time format", "time_format", "The format in which the time will be displayed.", old.TimeFormat, "24", "12")
+						@URLBuilderRadio("Show AM/PM", "show_am_pm", "Display AM/PM indicator for the time when the time format is 12 hour.", boolPtrToStringPtr(old.ShowAmPm), "true", "true", "false", "false")
 					}
-					@URLBuilderRadio("Show date", "show_date", "Display the current date.", "true", "true", "false", "false")
+					@URLBuilderRadio("Show date", "show_date", "Display the current date.", boolPtrToStringPtr(old.ShowDate), "true", "true", "false", "false")
 					if extended {
-						@URLBuilderText("Date format", "date_format", "The format in which the date will be displayed.", c.DateFormat)
-						@URLBuilderRadio("Clock source", "clock_source", "The source of the clock.", "Client", "client", "Server", "server")
+						@URLBuilderText("Date format", "date_format", "The format in which the date will be displayed.", c.DateFormat, old.DateFormat)
+						@URLBuilderRadio("Clock source", "clock_source", "The source of the clock.", old.ClockSource, "Client", "client", "Server", "server")
 					}
 					// UI
 					<h2>User Interface</h2>
 					if extended {
-						@URLBuilderRadio("Show clear cache button", "show_clear_cache_button", "Show a menu button to clear the Kiosk server cache.", "true", "true", "false", "false")
+						@URLBuilderRadio("Show clear cache button", "show_clear_cache_button", "Show a menu button to clear the Kiosk server cache.", boolPtrToStringPtr(old.ShowClearCacheButton), "true", "true", "false", "false")
 					}
-					@URLBuilderRadio("Show progress bar", "show_progress_bar", "Show a progress bar indicating the time remaining for the current asset.", "true", "true", "false", "false")
+					@URLBuilderRadio("Show progress bar", "show_progress_bar", "Show a progress bar indicating the time remaining for the current asset.", boolPtrToStringPtr(old.ShowProgressBar), "true", "true", "false", "false")
 					if extended {
-						@URLBuilderRadio("Progress bar position", "progress_bar_position", "Set the position of the progress bar.", "top", "top", "bottom", "bottom")
-						@URLBuilderRadio("Hide cursor", "hide_cursor", "", "true", "true", "false", "false")
-						@URLBuilderNumber("Font size", "font_size", "The base font size for Kiosk. Default is 100% (16px).", 100, 0, strconv.FormatInt(int64(c.FontSize), 10))
+						@URLBuilderRadio("Progress bar position", "progress_bar_position", "Set the position of the progress bar.", old.ProgressBarPosition, "top", "top", "bottom", "bottom")
+						@URLBuilderRadio("Hide cursor", "hide_cursor", "", boolPtrToStringPtr(old.HideCursor), "true", "true", "false", "false")
+						@URLBuilderNumber("Font size", "font_size", "The base font size for Kiosk. Default is 100% (16px).", 100, 0, strconv.FormatInt(int64(c.FontSize), 10), old.FontSize)
 					}
-					@URLBuilderSelect("Theme", "theme", "Theme to use for the UI", "fade", "fade", "solid", "solid", "bubble", "bubble")
-					@URLBuilderSelect("Layout", "layout", "How images are arranged on the screen", "single", "single", "portrait", "portrait", "landscape", "landscape", "splitview", "splitview", "splitview-landscape", "splitview-landscape")
+					@URLBuilderSelect("Theme", "theme", "Theme to use for the UI", old.Theme, "fade", "fade", "solid", "solid", "bubble", "bubble")
+					@URLBuilderSelect("Layout", "layout", "How images are arranged on the screen", old.Layout, "single", "single", "portrait", "portrait", "landscape", "landscape", "splitview", "splitview", "splitview-landscape", "splitview-landscape")
 					<h2>Transitions</h2>
 					// Transition
-					@URLBuilderSelect("Transition", "transition", "Transition to use when changing images", "none", "none", "fade", "fade", "cross-fade", "cross-fade")
+					@URLBuilderSelect("Transition", "transition", "Transition to use when changing images", old.Transition, "none", "none", "fade", "fade", "cross-fade", "cross-fade")
 					if extended {
 						// Image Display Options
 						<h2>Image Display Options</h2>
-						@URLBuilderRadio("Image fit", "image_fit", "How the image will fit on your screen.", "none", "none", "contain", "contain", "cover", "cover")
-						@URLBuilderRadio("Image effect", "image_effect", "Add an effect to images.", "none", "none", "zoom", "zoom", "smart-zoom", "smart-zoom")
-						@URLBuilderNumber("Image effect amount", "image_effect_amount", "Set the intensity of the image effect.", 100, 0, strconv.FormatInt(int64(c.ImageEffectAmount), 10))
-						@URLBuilderRadio("Use original image", "use_original_image", "Use the original image instead of the Immich optimized version.", "true", "true", "false", "false")
+						@URLBuilderRadio("Image fit", "image_fit", "How the image will fit on your screen.", old.ImageFit, "none", "none", "contain", "contain", "cover", "cover")
+						@URLBuilderRadio("Image effect", "image_effect", "Add an effect to images.", old.ImageEffect, "none", "none", "zoom", "zoom", "smart-zoom", "smart-zoom")
+						@URLBuilderNumber("Image effect amount", "image_effect_amount", "Set the intensity of the image effect.", 100, 0, strconv.FormatInt(int64(c.ImageEffectAmount), 10), old.ImageEffectAmount)
+						@URLBuilderRadio("Use original image", "use_original_image", "Use the original image instead of the Immich optimized version.", boolPtrToStringPtr(old.UseOriginalImage), "true", "true", "false", "false")
 						// Metadata
 						<h2>Metadata</h2>
-						@URLBuilderRadio("Show star rating", "show_image_rating", "Show the star rating of the asset.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show owner", "show_owner", "Show the owner of the asset.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show album name", "show_album_name", "Display album name(s) that the asset appears in.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show person name", "show_person_name", "Display person name(s).", "true", "true", "false", "false")
-						@URLBuilderRadio("Show person age", "show_person_age", "Display person age.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show image time", "show_image_time", "Show the time the image was taken.", "true", "true", "false", "false")
-						@URLBuilderRadio("Image time format", "image_time_format", "Format for displaying image time.", "24 hour", "24", "12 hour", "12")
-						@URLBuilderRadio("Show image date", "show_image_date", "Show the date the image was taken.", "true", "true", "false", "false")
-						@URLBuilderText("Image date format", "image_date_format", "Format for displaying image date.", "YYYY-MM-DD")
-						@URLBuilderRadio("Show image description", "show_image_description", "Show the description of the image.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show image camera", "show_image_camera", "Show camera model for the image.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show image EXIF", "show_image_exif", "Show EXIF metadata for the image.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show image location", "show_image_location", "Show the location where the image was taken.", "true", "true", "false", "false")
+						@URLBuilderRadio("Show star rating", "show_image_rating", "Show the star rating of the asset.", boolPtrToStringPtr(old.ShowImageRating), "true", "true", "false", "false")
+						@URLBuilderRadio("Show owner", "show_owner", "Show the owner of the asset.", boolPtrToStringPtr(old.ShowOwner), "true", "true", "false", "false")
+						@URLBuilderRadio("Show album name", "show_album_name", "Display album name(s) that the asset appears in.", boolPtrToStringPtr(old.ShowAlbumName), "true", "true", "false", "false")
+						@URLBuilderRadio("Show person name", "show_person_name", "Display person name(s).", boolPtrToStringPtr(old.ShowPersonName), "true", "true", "false", "false")
+						@URLBuilderRadio("Show person age", "show_person_age", "Display person age.", boolPtrToStringPtr(old.ShowPersonAge), "true", "true", "false", "false")
+						@URLBuilderRadio("Show image time", "show_image_time", "Show the time the image was taken.", boolPtrToStringPtr(old.ShowImageTime), "true", "true", "false", "false")
+						@URLBuilderRadio("Image time format", "image_time_format", "Format for displaying image time.", old.ImageTimeFormat, "24 hour", "24", "12 hour", "12")
+						@URLBuilderText("Image date format", "image_date_format", "Format for displaying image date.", "YYYY-MM-DD", old.ImageDateFormat)
+						@URLBuilderRadio("Show image description", "show_image_description", "Show the description of the image.", boolPtrToStringPtr(old.ShowImageDescription), "true", "true", "false", "false")
+						@URLBuilderRadio("Show image camera", "show_image_camera", "Show camera model for the image.", boolPtrToStringPtr(old.ShowImageCamera), "true", "true", "false", "false")
+						@URLBuilderRadio("Show image EXIF", "show_image_exif", "Show EXIF metadata for the image.", boolPtrToStringPtr(old.ShowImageEXIF), "true", "true", "false", "false")
+						@URLBuilderRadio("Show image location", "show_image_location", "Show the location where the image was taken.", boolPtrToStringPtr(old.ShowImageLocation), "true", "true", "false", "false")
 						<div class="form-group">
 							<label>Image Location</label>
 							<div class="form-group--description">
 								These options only apply when “Show image location” is enabled.
 							</div>
 							<div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 1.5rem">
-								@URLBuilderRadio("Hide city", "image_location_hide_city", "Hide the city name in the location.", "true", "true", "false", "false")
-								@URLBuilderRadio("Hide state", "image_location_hide_state", "Hide the state name in the location.", "true", "true", "false", "false")
-								@URLBuilderRadio("Hide country", "image_location_hide_country", "Hide the country name in the location.", "true", "true", "false", "false")
+								@URLBuilderRadio("Hide city", "image_location_hide_city", "Hide the city name in the location.", boolPtrToStringPtr(old.ImageLocationHideCity), "true", "true", "false", "false")
+								@URLBuilderRadio("Hide state", "image_location_hide_state", "Hide the state name in the location.", boolPtrToStringPtr(old.ImageLocationHideState), "true", "true", "false", "false")
+								@URLBuilderRadio("Hide country", "image_location_hide_country", "Hide the country name in the location.", boolPtrToStringPtr(old.ImageLocationHideCountry), "true", "true", "false", "false")
 							</div>
 						</div>
-						@URLBuilderRadio("Show image QR", "show_image_qr", "Display a QR code linking to the original image (in Immich).", "true", "true", "false", "false")
-						@URLBuilderRadio("Show image ID", "show_image_id", "Display the Immich ID of the image.", "true", "true", "false", "false")
+						@URLBuilderRadio("Show image QR", "show_image_qr", "Display a QR code linking to the original image (in Immich).", boolPtrToStringPtr(old.ShowImageQR), "true", "true", "false", "false")
+						@URLBuilderRadio("Show image ID", "show_image_id", "Display the Immich ID of the image.", boolPtrToStringPtr(old.ShowImageID), "true", "true", "false", "false")
 						if extended {
 							// Weather
 							<h2>Weather</h2>
 							if len(c.Weather.Locations) > 0 {
-								@URLBuilderSelect("Weather location", weather.WeatherParam, "The configured weather location name, or rotate to cycle through configured locations.", weatherLocationOptions(c.Weather.Locations)...)
-								@URLBuilderNumber("Weather rotation interval", weather.WeatherRotationIntervalParam, "The interval in seconds to rotate weather locations.", 10, 0, strconv.FormatInt(int64(c.Weather.RotationInterval), 10))
-								@URLBuilderRadio("Show forecast", weather.WeatherShowForecastParam, "Display the weather forecast when forecast data is configured for the selected location at startup.", "true", "true", "false", "false")
-								@URLBuilderRadio("Show humidity", weather.WeatherShowHumidityParam, "Display the humidity stat.", "true", "true", "false", "false")
-								@URLBuilderRadio("Show wind", weather.WeatherShowWindParam, "Display the wind stat.", "true", "true", "false", "false")
-								@URLBuilderRadio("Show wind direction", weather.WeatherShowWindDirectionParam, "Display degrees for wind direction.", "true", "true", "false", "false")
-								@URLBuilderRadio("Show visibility", weather.WeatherShowVisibilityParam, "Display the visibility stat.", "true", "true", "false", "false")
-								@URLBuilderRadio("Show temperature range", weather.WeatherShowTemperatureRangeParam, "Display the next 24 hour high and low when forecast data is configured for the selected location at startup.", "true", "true", "false", "false")
-								@URLBuilderRadio("Round temperature", weather.WeatherRoundTemperatureParam, "Round displayed temperatures to whole numbers.", "true", "true", "false", "false")
+								@URLBuilderSelect("Weather location", weather.WeatherParam, "The configured weather location name, or rotate to cycle through configured locations.", old.Weather, weatherLocationOptions(c.Weather.Locations)...)
+								@URLBuilderNumber("Weather rotation interval", weather.WeatherRotationIntervalParam, "The interval in seconds to rotate weather locations.", 10, 0, strconv.FormatInt(int64(c.Weather.RotationInterval), 10), old.WeatherRotationInterval)
+								@URLBuilderRadio("Show forecast", weather.WeatherShowForecastParam, "Display the weather forecast when forecast data is configured for the selected location at startup.", boolPtrToStringPtr(old.WeatherShowForecast), "true", "true", "false", "false")
+								@URLBuilderRadio("Show humidity", weather.WeatherShowHumidityParam, "Display the humidity stat.", boolPtrToStringPtr(old.WeatherShowHumidity), "true", "true", "false", "false")
+								@URLBuilderRadio("Show wind", weather.WeatherShowWindParam, "Display the wind stat.", boolPtrToStringPtr(old.WeatherShowWind), "true", "true", "false", "false")
+								@URLBuilderRadio("Show wind direction", weather.WeatherShowWindDirectionParam, "Display degrees for wind direction.", boolPtrToStringPtr(old.WeatherShowWindDirection), "true", "true", "false", "false")
+								@URLBuilderRadio("Show visibility", weather.WeatherShowVisibilityParam, "Display the visibility stat.", boolPtrToStringPtr(old.WeatherShowVisibility), "true", "true", "false", "false")
+								@URLBuilderRadio("Show temperature range", weather.WeatherShowTemperatureRangeParam, "Display the next 24 hour high and low when forecast data is configured for the selected location at startup.", boolPtrToStringPtr(old.WeatherShowTemperatureRange), "true", "true", "false", "false")
+								@URLBuilderRadio("Round temperature", weather.WeatherRoundTemperatureParam, "Round displayed temperatures to whole numbers.", boolPtrToStringPtr(old.WeatherRoundTemperature), "true", "true", "false", "false")
 							} else {
 								<div class="form-group">
 									<span>No weather locations configured.</span>
@@ -260,16 +259,16 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 						}
 						// More information
 						<h2>More Information Overlay</h2>
-						@URLBuilderRadio("Show more info", "show_more_info", "Enable the more information overlay.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show more info image link", "show_more_info_image_link", "Display a link to the image in the more info overlay.", "true", "true", "false", "false")
-						@URLBuilderRadio("Show more info QR code", "show_more_info_qr_code", "Display a QR code in the more info overlay.", "true", "true", "false", "false")
+						@URLBuilderRadio("Show more info", "show_more_info", "Enable the more information overlay.", boolPtrToStringPtr(old.ShowMoreInfo), "true", "true", "false", "false")
+						@URLBuilderRadio("Show more info image link", "show_more_info_image_link", "Display a link to the image in the more info overlay.", boolPtrToStringPtr(old.ShowMoreInfoImageLink), "true", "true", "false", "false")
+						@URLBuilderRadio("Show more info QR code", "show_more_info_qr_code", "Display a QR code in the more info overlay.", boolPtrToStringPtr(old.ShowMoreInfoQRCode), "true", "true", "false", "false")
 						@URLBuilderMultiSelect("Like button action", "like_button_action", "Action(s) to perform when the like button is clicked.") {
-							<option value="favorite">Favorite</option>
-							<option value="album">Album</option>
+							<option value="favorite" selected?={slices.Contains(old.LikeButtonAction, "favorite")}>Favorite</option>
+							<option value="album" selected?={slices.Contains(old.LikeButtonAction, "album")}>Album</option>
 						}
 						@URLBuilderMultiSelect("Hide button action", "hide_button_action", "Action(s) to perform when the hide button is clicked.") {
-							<option value="tag">Tag</option>
-							<option value="archive">Archive</option>
+							<option value="tag" selected?={slices.Contains(old.HideButtonAction, "tag")}>Tag</option>
+							<option value="archive" selected?={slices.Contains(old.HideButtonAction, "archive")}>Archive</option>
 						}
 					}
 				</form>
@@ -308,7 +307,6 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 }
 
 templ URLBuilderNumber(displayName, formName, helpText string, min int, max int, placeholder string, oldValue *uint64) {
-	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		<label for={ "url-builder-" + formName }>{ displayName }</label>
 		@URLBuilderHelpText(helpText)
@@ -321,8 +319,8 @@ templ URLBuilderNumber(displayName, formName, helpText string, min int, max int,
 				max={ max }
 			}
 			placeholder={ placeholder }
-			if oldExists {
-				value={ oldValue }
+			if oldValue != nil {
+				value={ *oldValue }
 			}
 		/>
 	</div>
@@ -370,7 +368,6 @@ templ URLBuilderMultiSelectWithOptions(displayName, formName, helpText string, o
 }
 
 templ URLBuilderRadio(displayName string, formName string, helpText string, oldValue *string, keyvals ...string) {
-	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		<legend>{ displayName }</legend>
 		@URLBuilderHelpText(helpText)
@@ -390,7 +387,7 @@ templ URLBuilderRadio(displayName string, formName string, helpText string, oldV
 						id={ formName + "_" + kvs[i+1] }
 						name={ formName }
 						value={ kvs[i+1] }
-						if (!oldExists && i==0) || oldValue == kvs[i+1] {
+						if (oldValue == nil && i==0) || (oldValue != nil && *oldValue == kvs[i+1]) {
 							checked="checked"
 						}
 					/>
@@ -402,7 +399,6 @@ templ URLBuilderRadio(displayName string, formName string, helpText string, oldV
 }
 
 templ URLBuilderText(displayName, formName, helpText, defaultValue string, oldValue *string) {
-	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		{{ elementID := "url-builder-" + formName }}
 		<label for={ elementID }>{ displayName }</label>
@@ -412,8 +408,8 @@ templ URLBuilderText(displayName, formName, helpText, defaultValue string, oldVa
 			id={ elementID }
 			name={ formName }
 			placeholder={ defaultValue }
-			if oldExists {
-				value={ oldValue }
+			if oldValue != nil {
+				value={ *oldValue }
 			} else {
 				value=""
 			}
@@ -422,7 +418,6 @@ templ URLBuilderText(displayName, formName, helpText, defaultValue string, oldVa
 }
 
 templ URLBuilderSelect(displayName string, formName string, helpText string, oldValue *string, keyvals ...string) {
-	{{ oldValue, oldExists := GetValue[string](old, formName) }}
 	<div class="form-group">
 		{{ elementID := "url-builder-" + formName }}
 		<label for={ elementID }>{ displayName }</label>
@@ -439,7 +434,7 @@ templ URLBuilderSelect(displayName string, formName string, helpText string, old
 			for i:=0; i<len(kvs); i+=2 {
 				<option
 					value={ kvs[i+1] }
-					if (!oldExists && i==0) || oldValue == kvs[i+1] {
+					if (oldValue == nil && i==0) || (oldValue != nil && *oldValue == kvs[i+1]) {
 						selected="selected"
 					}
 				>{ kvs[i] }</option>
