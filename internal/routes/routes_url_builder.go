@@ -166,6 +166,7 @@ func URLBuilderPage(baseConfig *config.Config, com *common.Common, extended bool
 			RequestID:    requestID,
 			DeviceID:     deviceID,
 			Config:       requestConfig,
+			Queries:      c.Request().URL.Query(),
 		}
 
 		urlData := common.URLViewData{

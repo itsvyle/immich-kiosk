@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/damongolding/immich-kiosk/internal/common"
 	"github.com/damongolding/immich-kiosk/internal/config"
@@ -57,11 +58,6 @@ func intPtrToUInt64Ptr(i *int) *uint64 {
 	return &u
 }
 
-var old common.URLBuilderRequest
-func init() {
-	old = common.URLBuilderRequest{}
-}
-
 templ URLBuilder(viewData common.ViewData, urlData common.URLViewData, extended bool) {
 	@HTMLTag(viewData.SystemLang) {
 		<head>
@@ -70,13 +66,27 @@ templ URLBuilder(viewData common.ViewData, urlData common.URLViewData, extended 
 		</head>
 		<body id="url-builder" class="notranslate">
 			<div class="url-container">
-				@URLBuilderForm(viewData.Config, urlData, extended)
+				@URLBuilderForm(viewData.Config, urlData, viewData.Queries, extended)
 			</div>
 		</body>
 	}
 }
 
-templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
+templ URLBuilderForm(c config.Config, d common.URLViewData, queries url.Values, extended bool) {
+	{{ var old common.URLBuilderRequest }}
+	{{ if queries.Has("old_query") {
+		var err error
+		old, err = common.ParseURLBuilderRequest(queries.Get("old_query"))
+		if err != nil {
+			old = common.URLBuilderRequest{}
+		}
+		s := queries.Get("old_query")
+		old.OldQuery = &s
+	} }} 
+	{{ if queries.Has("old_name") {
+		s := queries.Get("old_name")
+		old.Name = &s
+	}}}
 	{{ t := i18n.T() }}
 	<section class={ "url-container--form", templ.KV("extended", extended) }>
 		<div class="url-container--form--content">
@@ -100,6 +110,12 @@ templ URLBuilderForm(c config.Config, d common.URLViewData, extended bool) {
 					}
 				>
 					<h2>YAML Metadata</h2>
+					if old.OldQuery != nil {
+						<input type="hidden" name="old_query" value={ *old.OldQuery } />
+					}
+					if old.Name != nil {
+						<input type="hidden" name="old_name" value={ *old.Name } />
+					}
 					@URLBuilderText("Name", "name", "The name of the redirect. Only required if you want to use the YAML output.", "", old.Name)
 					@URLBuilderSelect("Type", "type", "The type of redirect to create.", old.Type,"internal", "internal", "external", "external")
 					// Behaviour

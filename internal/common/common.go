@@ -16,6 +16,7 @@ import (
 	"github.com/damongolding/immich-kiosk/internal/immich"
 	"github.com/damongolding/immich-kiosk/internal/kiosk"
 	"github.com/damongolding/immich-kiosk/internal/utils"
+	"github.com/gorilla/schema"
 	"github.com/labstack/echo/v5"
 )
 
@@ -137,8 +138,10 @@ type URLViewData struct {
 
 type URLBuilderRequest struct {
 	// Metadata
-	Name *string `form:"name" url:"-"`
-	Type *string `form:"type" url:"-"`
+	OldName  *string `form:"old_name" url:"-"`
+	OldQuery *string `form:"old_query" url:"-"`
+	Name     *string `form:"name" url:"-"`
+	Type     *string `form:"type" url:"-"`
 
 	// Duration
 	Duration       *uint64 `form:"duration" url:"duration,omitempty"`
@@ -231,4 +234,25 @@ type URLBuilderRequest struct {
 	ShowMoreInfoQRCode    *bool    `form:"show_more_info_qr_code" url:"show_more_info_qr_code,omitempty"`
 	LikeButtonAction      []string `form:"like_button_action" url:"like_button_action,omitempty"`
 	HideButtonAction      []string `form:"hide_button_action" url:"hide_button_action,omitempty"`
+}
+
+var decoder = schema.NewDecoder()
+
+func init() {
+	decoder.SetAliasTag("url")
+	decoder.IgnoreUnknownKeys(true)
+}
+
+// used to parse a URLBuilderRequest from a raw query string, like for example "name=test&type=album&duration=60&optimize_images=true"
+func ParseURLBuilderRequest(rawQuery string) (URLBuilderRequest, error) {
+	values, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		return URLBuilderRequest{}, err
+	}
+
+	var dst URLBuilderRequest
+	if err = decoder.Decode(&dst, values); err != nil {
+		return URLBuilderRequest{}, err
+	}
+	return dst, nil
 }
